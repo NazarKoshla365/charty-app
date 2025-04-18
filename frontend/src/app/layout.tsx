@@ -1,7 +1,8 @@
-import { AuthProvider } from "./context/AuthProvider";
+
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 const inter = Inter({
   weight: "600",
@@ -25,10 +26,14 @@ export default function RootLayout({
       <body
         className={`${inter.className}`}
       >
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+      
+          <GoogleOAuthProvider clientId={process.env.GOOGLE_CLIENT_ID || "449279408426-cmqu8ujvgilceelbmciuh6ib1kbodsvq.apps.googleusercontent.com"}>
+            {children}
+          </GoogleOAuthProvider>
+       
       </body>
     </html>
   );
+
 }
+
