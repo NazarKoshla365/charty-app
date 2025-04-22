@@ -1,65 +1,130 @@
-    import { InputMessage } from "./InputMessage"
-    import { Phone } from 'lucide-react';
-    import Image from "next/image"
-    export function ChatItem() {
+'use client';
+
+import { InputMessage } from "./InputMessage"
+import { ChatMessages } from "./ChatMessages";
+import { useAuthStore } from "@/store/authStore";
+import { Phone } from 'lucide-react';
+import Image from "next/image"
+import socket from "../../lib/socket"
+import { useEffect, useState } from "react";
+type ChatItemProps = {
+    chatAction: {
+        id: number;
+        friendId: number;
+        name: string;
+        img: string;
+    } | null;
+};
+export function ChatItem({ chatAction }: ChatItemProps) {
+    const [messages, setMessages] = useState<any[]>([]);
+    const [newMessage, setNewMessage] = useState('');
+    const [userId, setUserId] = useState<string | null | undefined>(undefined);
+    const [isOnline, setIsOnline] = useState(false)
+    const { user } = useAuthStore()
+    const userIdData = user?.userId
+
+
+    useEffect(() => {
+        if (!userIdData) return;
+
+        if (socket.connected) {
+            setUserId(userIdData);
+            console.log("Socket already connected, ID:", socket.id);
+        } else {
+            const handleSocketConnect = () => {
+                setUserId(userIdData);
+                console.log("Socket connected (delayed), ID:", socket.id);
+            };
+            socket.on("connect", handleSocketConnect);
+
+            return () => {
+                socket.off("connect", handleSocketConnect);
+            };
+        }
+    }, [userIdData]);
+
+    useEffect(() => {
+        if (!chatAction) return;
+        console.log("Chat action has been set:", chatAction);
+        socket.emit("join-chat", chatAction.id);
+        console.log("Sent join-chat event for chat ID:", chatAction.id);
+        socket.emit("check-online-status", chatAction.friendId, (isOnline: boolean) => {
+            console.log("User online status:", isOnline); // Лог статусу корист
+            setIsOnline(isOnline);
+        });
+
+        const handleMessage = (message: any) => {
+            if (message.from === userIdData) return;
+            console.log("Received message:", message);
+            setMessages((prevMessages) => [...prevMessages, message]);
+        };
+
+
+
+        const handleUserOnline = (id: number) => {
+            console.log(`User ${id} is online`);
+            if (id === chatAction.friendId) setIsOnline(true);
+        };
+
+        const handleUserOffline = (id: number) => {
+            console.log(`User ${id} is offline`);
+            if (id === chatAction.friendId) setIsOnline(false);
+        };
+        socket.on("receive-message", handleMessage);
+        socket.on("user-online", handleUserOnline);
+        socket.on("user-offline", handleUserOffline);
+
+        return () => {
+            socket.off("receive-message", handleMessage);
+            socket.off("user-online", handleUserOnline);
+            socket.off("user-offline", handleUserOffline);
+        };
+    }, [chatAction,userIdData]);
+
+    const handleSendMessage = () => {
+        if (newMessage && chatAction) {
+            const localMsg = {
+                from: userIdData,
+                message: newMessage,
+            };
+
+            setMessages((prevMessages) => [...prevMessages, localMsg]);
+
+            socket.emit("send-message", {
+                chatId: chatAction.id,
+                message: newMessage,
+            });
+
+            setNewMessage('');
+        }
+    };
+    if (!chatAction) {
         return (
-            <div className="flex justify-center w-full border-x border-[#00000014] ">
-                 <div className="flex flex-col w-[45vw]">
+            <div className="flex justify-center items-center w-full border-x border-[#00000014]">
+                <p className="text-gray-500 text-2xl text-center  w-[45vw]">You don't have any chats yet.</p>
+            </div>
+        );
+    }
+    return (
+        <div className="flex justify-center w-full border-x border-[#00000014] ">
+            <div className="flex flex-col w-[45vw]">
                 <div className="flex items-center justify-between py-[18px] px-6  border-b  border-[#00000014]">
                     <div className="flex items-center gap-x-4">
-                        <Image src="/users/us2.png" width={40} height={40} alt=""></Image>
+                        <Image src={chatAction.img} className="w-[40px] h-[40px] rounded-[10px]" width={40} height={40} alt=""></Image>
                         <div>
-                            <h2 className="text-xl">Florencio Dorrance</h2>
-                            <p className="flex items-center gap-x-2 text-xs text-[#00000099]"><span className=" block w-[10px] h-[10px] rounded-full bg-[#68D391]"></span>Online</p>
+                            <h2 className="text-xl">{chatAction.name}</h2>
+                            <p className="flex items-center gap-x-2 text-xs text-[#00000099]"><span className={`block w-[10px] h-[10px] rounded-full ${isOnline ? "bg-[#68D391]" : 'bg-[#E53E3E]'} `}></span>{isOnline ? 'Online' : 'Offline'}</p>
                         </div>
                     </div>
                     <button className="flex items-center gap-x-2 py-[10px] px-4 rounded-lg text-[#615ef0] bg-[#615EF01A]"><Phone className="w-5 h-5" />Call</button>
                 </div>
-                <div className="p-6 flex-1 overflow-auto">
-                    <div className="flex items-start gap-x-4">
-                        <Image src="/users/us2.png" width={40} height={40} alt=""></Image>
-                        <div className="flex flex-col gap-y-[10px]">
-                            <p className="text-sm font-normal py-2 px-4 rounded-xl bg-[#F1F1F1]">omg, this is amazing</p>
-                            <p className="text-sm font-normal py-2 px-4 rounded-xl bg-[#F1F1F1]">perfect! ✅</p>
-                            <p className="text-sm font-normal py-2 px-4 rounded-xl bg-[#F1F1F1]">Wow, this is really epic</p>
-                        </div>
-                    </div>
-                    <div className="flex items-start justify-end gap-x-4">
-                        <div className="flex flex-col gap-y-[10px]">
-                            <p className="text-sm font-normal py-2 px-4 rounded-xl text-white bg-[#615EF0]">How are you?</p>
-                        </div>
-                        <Image src="/users/us2.png" width={40} height={40} alt=""></Image>
-                    </div>
-                    <div className="flex items-start gap-x-4">
-                        <Image src="/users/us2.png" width={40} height={40} alt=""></Image>
-                        <div className="flex flex-col gap-y-[10px]">
-                            <p className="text-sm font-normal py-2 px-4 rounded-xl bg-[#F1F1F1]">just ideas for next time</p>
-                            <p className="text-sm font-normal py-2 px-4 rounded-xl bg-[#F1F1F1]">I'll be there in 2 mins ⏰</p>
-                        </div>
-                    </div>
-                    <div className="flex items-start justify-end gap-x-4">
-                        <div className="flex flex-col gap-y-[10px]">
-                            <p className="text-sm font-normal py-2 px-4 rounded-xl text-white bg-[#615EF0]">woohoooo</p>
-                            <p className="text-sm font-normal py-2 px-4 rounded-xl text-white bg-[#615EF0]">Haha oh man</p>
-                            <p className="text-sm font-normal py-2 px-4 rounded-xl text-white bg-[#615EF0]">Haha that's terrifying 😂</p>
-                        </div>
-                        <Image src="/users/us2.png" width={40} height={40} alt=""></Image>
-                    </div>
-                    <div className="flex items-start gap-x-4">
-                        <Image src="/users/us2.png" width={40} height={40} alt=""></Image>
-                        <div className="flex flex-col gap-y-[10px]">
-                            <p className="text-sm font-normal py-2 px-4 rounded-xl bg-[#F1F1F1]">just ideas for next time</p>
-                            <p className="text-sm font-normal py-2 px-4 rounded-xl bg-[#F1F1F1]">I'll be there in 2 mins ⏰</p>
-                            <p className="text-sm font-normal py-2 px-4 rounded-xl bg-[#F1F1F1]">I'll be there in 2 mins ⏰</p>
-                        </div>
-                    </div>
-                </div>
+                <ChatMessages chatId={chatAction.id} userId={userId} messages={messages} />
                 <div className="mt-auto">
-                    <InputMessage />
+                    <InputMessage onSendMessageAction={handleSendMessage} newMessageAction={newMessage} setNewMessageAction={setNewMessage} />
                 </div>
+            </div>
+        </div>
 
-            </div>
-            </div>
-           
-        )
-    }
+    )
+}
+

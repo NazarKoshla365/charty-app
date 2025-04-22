@@ -4,6 +4,8 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/authRoutes";
+import friendRoutes from "./routes/friendRoutes";
+import chatRoutes from "./routes/chatRoutes"
 import { v2 as cloudinary } from 'cloudinary';
 
 
@@ -39,6 +41,9 @@ cloudinary.config({
 
 
 app.use("/auth",authRoutes)    
+app.use("/friend",friendRoutes)    
+app.use("/chat",chatRoutes)    
+
 
 export default app
 export { cloudinary };

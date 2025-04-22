@@ -9,7 +9,8 @@ interface IUser extends Document {
     provider: 'google' | 'credentials';
     jwt?: string;
     createdAt?: Date;
-    socketId?: string;
+    friendRequests?: Types.ObjectId[];
+    friends?: Types.ObjectId[];
 }
 const UserSchema = new Schema<IUser>({
     username: { type: String, required: true, unique: true },
@@ -19,7 +20,8 @@ const UserSchema = new Schema<IUser>({
     provider: { type: String, enum: ['google', 'credentials'], default: 'credentials' },
     jwt: { type: String },
     createdAt: { type: Date, default: Date.now },
-    socketId: { type: String, default: null }
+    friendRequests: { type: [Schema.Types.ObjectId], default: [] },
+    friends: { type: [Schema.Types.ObjectId], default: [] },
 })
 const User = mongoose.model<IUser>("User", UserSchema)
 

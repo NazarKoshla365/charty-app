@@ -2,10 +2,10 @@ import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import { OAuth2Client } from "google-auth-library";
 import { generateJwtToken } from "../utils/generateJwt";
-import jwt from "jsonwebtoken";
 import User from "../models/user";
 import { generateAvatar } from "../utils/generateAvatar";
 import { v2 as cloudinary } from 'cloudinary';
+import { verifyToken } from "../utils/verifyToken";
 
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID as string);
@@ -19,7 +19,7 @@ export const checkAuth = async (req: Request, res: Response) => {
         return res.status(401).json({ message: "Unauthorized" })
     }
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { id: string };
+        const decoded = verifyToken(token);
         const user = await User.findById(decoded.id);
         if(!user){
             return res.status(401).json({message:"User not found"})
@@ -34,8 +34,7 @@ export const checkAuth = async (req: Request, res: Response) => {
     }
     catch (err) {
         console.error('Check auth error:', err);
-
-        res.clearCookie("token"); // Видалити токен
+        res.clearCookie("token"); 
         return res.status(401).json({ message: 'Token expired or invalid' });
     }
 }

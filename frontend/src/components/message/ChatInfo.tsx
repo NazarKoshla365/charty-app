@@ -1,3 +1,5 @@
+'use client';
+
 import { EllipsisVertical } from 'lucide-react';
 import Image from 'next/image';
 export function ChatInfo() {

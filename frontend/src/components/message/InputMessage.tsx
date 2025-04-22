@@ -1,22 +1,26 @@
 'use client'
 import Image from "next/image"
-import { useState, useRef, useEffect } from "react";
+import {  useRef, useEffect } from "react";
+interface InputMessageProps {
+  newMessageAction: string;
+  setNewMessageAction: (message: string) => void;
+  onSendMessageAction: () => void;
+};
+export function InputMessage({newMessageAction,setNewMessageAction,onSendMessageAction}:InputMessageProps) {
 
-export function InputMessage() {
-  const [value, setValue] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleResize = () => {
     const textarea = textareaRef.current;
     if (textarea) {
-      textarea.style.height = 'auto'; 
+      textarea.style.height = 'auto';
       textarea.style.height = `${textarea.scrollHeight}px`;
     }
   };
 
   useEffect(() => {
-    handleResize(); 
-  }, [value]); 
+    handleResize();
+  }, [newMessageAction]);
 
   return (
     <div className="flex items-center gap-x-6 p-6">
@@ -24,14 +28,16 @@ export function InputMessage() {
       <div className="flex items-center gap-x-[30px] py-[10px] px-5 border border-gray-300 rounded-xl">
         <textarea
           ref={textareaRef}
-          value={value}
+          value={newMessageAction}
           onInput={handleResize}
-          onChange={(e) => setValue(e.target.value)}
+          onChange={(e) => setNewMessageAction(e.target.value)}
           className="text-sm font-normal outline-0 w-[450px] resize-none break-words"
           placeholder="Type a message"
           style={{ minHeight: "20px", overflow: "hidden" }}
         />
-        <Image src="/send.svg" width={20} height={20} alt="" />
+        <button onClick={onSendMessageAction}>
+          <Image src="/send.svg" width={20} height={20} alt="" />
+        </button>
       </div>
     </div>
   )
