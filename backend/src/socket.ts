@@ -54,12 +54,9 @@ export const InitSocket = (server: HTTPServer) => {
                     from:userId,
                     message:message
                 })
-               await newMessage.save()
-                io.to(chatId).emit("receive-message", {
-                    from: userId,
-                    message,
-                   
-                });
+                const savedMessage =  await newMessage.save()
+              
+                io.to(chatId).emit("receive-message",savedMessage);
             }
             catch(err){
                 console.error("Error to save message",err)

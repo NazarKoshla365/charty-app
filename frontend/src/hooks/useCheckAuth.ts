@@ -17,10 +17,9 @@ export const CheckAuth = () => {
                     method: 'GET',
                     credentials: 'include',
                 })
-                const data = await res.json()
-                console.log(data)
-
                 if (res.ok) {
+                    const data = await res.json()
+                    console.log(data)
                     console.log("User is authenticated")
                     registerUser(data.user)
                 } else {

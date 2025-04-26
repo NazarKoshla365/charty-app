@@ -65,18 +65,20 @@ export const getUserChats = async (req: Request, res: Response) => {
                 path: 'participants',
                 select: 'username profilePicture'
             });
-        const mappedChats = chats.map((chat: any) => {
+        const mappedChats = await Promise.all(chats.map(async(chat: any) => {
             const friend = chat.participants.find((p: any) => p._id.toString() !== user._id.toString());
             if (!friend) return null;
+            const lastMsg = await Message.findOne({chat:chat._id}).sort({timestamp:-1})
             return {
                 _id: chat._id,
                 friend: {
                     _id: friend._id,
                     username: friend.username,
                     friendPicture: friend.profilePicture
-                }
+                },
+                lastMessage: lastMsg?.message || null,
             }
-        });
+        }));
 
         return res.status(200).json({ message: "Chats found", chats: mappedChats })
     }

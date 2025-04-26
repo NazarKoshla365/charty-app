@@ -3,25 +3,22 @@
 import { InputMessage } from "./InputMessage"
 import { ChatMessages } from "./ChatMessages";
 import { useAuthStore } from "@/store/authStore";
+import { useChatStore } from "@/store/chatStore";
+import { useMessageStore } from "@/store/messageStore";
 import { Phone } from 'lucide-react';
 import Image from "next/image"
 import socket from "../../lib/socket"
 import { useEffect, useState } from "react";
-type ChatItemProps = {
-    chatAction: {
-        id: number;
-        friendId: number;
-        name: string;
-        img: string;
-    } | null;
-};
-export function ChatItem({ chatAction }: ChatItemProps) {
-    const [messages, setMessages] = useState<any[]>([]);
+
+export function ChatItem() {
+    const {addMessage} = useMessageStore()
     const [newMessage, setNewMessage] = useState('');
     const [userId, setUserId] = useState<string | null | undefined>(undefined);
     const [isOnline, setIsOnline] = useState(false)
+    const { chatAction,chats,setChats} = useChatStore();
     const { user } = useAuthStore()
     const userIdData = user?.userId
+
 
 
     useEffect(() => {
@@ -33,7 +30,6 @@ export function ChatItem({ chatAction }: ChatItemProps) {
         } else {
             const handleSocketConnect = () => {
                 setUserId(userIdData);
-                console.log("Socket connected (delayed), ID:", socket.id);
             };
             socket.on("connect", handleSocketConnect);
 
@@ -44,19 +40,31 @@ export function ChatItem({ chatAction }: ChatItemProps) {
     }, [userIdData]);
 
     useEffect(() => {
-        if (!chatAction) return;
-        console.log("Chat action has been set:", chatAction);
+        if (!chatAction || !userIdData) return;
+
         socket.emit("join-chat", chatAction.id);
+
         console.log("Sent join-chat event for chat ID:", chatAction.id);
+
         socket.emit("check-online-status", chatAction.friendId, (isOnline: boolean) => {
-            console.log("User online status:", isOnline); // Лог статусу корист
+            console.log("User online status:", isOnline);
             setIsOnline(isOnline);
         });
 
         const handleMessage = (message: any) => {
-            if (message.from === userIdData) return;
+            if (message.chat !== chatAction.id) return;
             console.log("Received message:", message);
-            setMessages((prevMessages) => [...prevMessages, message]);
+            const updatedChats = chats.map(chat =>{
+                if(chat.id === message.chat){
+                    return {
+                        ...chat,
+                        message:message.message
+                    }
+                }
+                 return chat
+            })
+            setChats(updatedChats)
+            addMessage(message)
         };
 
 
@@ -79,24 +87,17 @@ export function ChatItem({ chatAction }: ChatItemProps) {
             socket.off("user-online", handleUserOnline);
             socket.off("user-offline", handleUserOffline);
         };
-    }, [chatAction,userIdData]);
+    }, [chatAction, userIdData]);
 
     const handleSendMessage = () => {
-        if (newMessage && chatAction) {
-            const localMsg = {
-                from: userIdData,
-                message: newMessage,
-            };
+        if (!newMessage.trim() || !chatAction || !userIdData) return;
 
-            setMessages((prevMessages) => [...prevMessages, localMsg]);
+        socket.emit("send-message", {
+            chatId: chatAction.id,
+            message: newMessage,
+        });
 
-            socket.emit("send-message", {
-                chatId: chatAction.id,
-                message: newMessage,
-            });
-
-            setNewMessage('');
-        }
+        setNewMessage('');
     };
     if (!chatAction) {
         return (
@@ -118,7 +119,7 @@ export function ChatItem({ chatAction }: ChatItemProps) {
                     </div>
                     <button className="flex items-center gap-x-2 py-[10px] px-4 rounded-lg text-[#615ef0] bg-[#615EF01A]"><Phone className="w-5 h-5" />Call</button>
                 </div>
-                <ChatMessages chatId={chatAction.id} userId={userId} messages={messages} />
+                <ChatMessages chatId={chatAction.id} userId={userId}  />
                 <div className="mt-auto">
                     <InputMessage onSendMessageAction={handleSendMessage} newMessageAction={newMessage} setNewMessageAction={setNewMessage} />
                 </div>

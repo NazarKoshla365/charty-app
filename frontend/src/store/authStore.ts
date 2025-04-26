@@ -14,8 +14,20 @@ interface AuthStore {
 }
 
 export const useAuthStore = create<AuthStore>((set) => ({
-  isRegistered: typeof window !== 'undefined' ? localStorage.getItem('isRegistered') === 'true' : false,
+  isRegistered: false,
   user: null,
-  registerUser: (user: User) => set({ isRegistered: true, user }),
-  logoutUser: () => set({ isRegistered: false }),
-}))
+
+  registerUser: (user: User) => {
+    set({ isRegistered: true, user });
+    if (typeof window !== 'undefined') {
+      localStorage.setItem("isRegistered", "true");
+    }
+  },
+
+  logoutUser: () => {
+    set({ isRegistered: false, user: null });
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem("isRegistered");
+    }
+  },
+}));

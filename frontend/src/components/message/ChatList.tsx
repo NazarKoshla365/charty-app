@@ -3,10 +3,13 @@
     import Image from 'next/image';
     import { useState, useEffect } from 'react';
     import { CreateChat } from './CreateChat';
-    export function ChatList({ onSelectChatAction }: { onSelectChatAction: (chat: { id: number, friendId: number, name: string, img: string }) => void }) {
+    import { useChatStore } from '@/store/chatStore'; 
+
+   
+    export function ChatList() {
         const [isClosed, setIsClosed] = useState(true)
         const [activeChat, setActiveChat] = useState<number | null>(null)
-        const [chats, setChats] = useState<any[]>([]);
+        const { setChatAction,chats, setChats } = useChatStore();
         useEffect(() => {
             const fetchChats = async () => {
                 try {
@@ -22,7 +25,7 @@
                                 id: chat._id,
                                 name: chat.friend.username,
                                 friendId: chat.friend._id,
-                                message: "Start chatting",
+                                message: chat.lastMessage,
                                 img: chat.friend.friendPicture,
                                 time: "now"
                             };
@@ -31,7 +34,7 @@
                         setChats(mappedChats);
                         if (mappedChats.length > 0) {
                             setActiveChat(mappedChats[0].id);
-                            onSelectChatAction(mappedChats[0]);
+                            setChatAction(mappedChats[0]);
                         }
                     }
                 }
@@ -42,9 +45,12 @@
             fetchChats()
         }, [])
 
-        const handleNewChatCreated = (newChat: any) => {
+        const handleNewChatCreated = (newChat: { 
+            chatId: number; 
+            participants: { id: number; username: string; profilePicture: string }[]; 
+        }) => {
             const friend = newChat.participants[1];
-            const newChatItem = {
+            const newChatItem  = {
                 id: newChat.chatId,
                 friendId: friend.id,
                 name: friend.username,
@@ -52,12 +58,10 @@
                 img: friend.profilePicture,
                 time: "",
             };
+
             console.log(newChatItem)
-            setChats(prev => [
-                ...prev,
-                newChatItem
-            ])
-            onSelectChatAction(newChatItem);
+            setChats([...chats, newChatItem]);
+            setChatAction(newChatItem);
 
         }
         const MessageItem = ({ id, friendId, name, message, img, time }: {
@@ -70,7 +74,10 @@
         }) => (
             <li  className={`${activeChat === id ? 'bg-[rgba(97,_94,_240,_0.06)]' : ''} flex items-start gap-x-4 p-3 w-[292px] rounded-xl`}
                 onClick={() => {
-                    onSelectChatAction({ id, friendId, name, img })
+                    setChatAction({
+                        id, friendId, name, img,
+                        message: ''
+                    })
                     setActiveChat(id)
                 }}>
                 <Image width={48} height={48} className='w-[48px] h-[48px] rounded-xl' src={img} alt="" />
