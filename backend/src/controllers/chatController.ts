@@ -63,7 +63,7 @@ export const getUserChats = async (req: Request, res: Response) => {
         const chats = await Chat.find({ participants: user._id })
             .populate({
                 path: 'participants',
-                select: 'username profilePicture'
+                select: 'username profilePicture lastSeen'
             });
         const mappedChats = await Promise.all(chats.map(async(chat: any) => {
             const friend = chat.participants.find((p: any) => p._id.toString() !== user._id.toString());
@@ -74,7 +74,8 @@ export const getUserChats = async (req: Request, res: Response) => {
                 friend: {
                     _id: friend._id,
                     username: friend.username,
-                    friendPicture: friend.profilePicture
+                    friendPicture: friend.profilePicture,
+                    time: friend.lastSeen
                 },
                 lastMessage: lastMsg?.message || null,
             }

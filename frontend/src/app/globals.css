@@ -1,5 +1,4 @@
 @import "tailwindcss";
-
 *{
   box-sizing: border-box;
 }
@@ -17,3 +16,4 @@ body{
 button{
   cursor: pointer;
 }
+@plugin 'tailwind-scrollbar';

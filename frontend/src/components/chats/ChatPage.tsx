@@ -1,8 +1,8 @@
 'use client';
 
 import { ChatList } from "./ChatList"
-import { ChatItem } from "./ChatItem"
-import {useState} from "react"
+import { ChatItem } from "./chat-item/ChatItem"
+
 export const ChatPage = () => {
     return(
         <div className="flex">

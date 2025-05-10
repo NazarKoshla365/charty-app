@@ -11,6 +11,7 @@ interface IUser extends Document {
     createdAt?: Date;
     friendRequests?: Types.ObjectId[];
     friends?: Types.ObjectId[];
+    lastSeen?: Date
 }
 const UserSchema = new Schema<IUser>({
     username: { type: String, required: true, unique: true },
@@ -22,6 +23,8 @@ const UserSchema = new Schema<IUser>({
     createdAt: { type: Date, default: Date.now },
     friendRequests: { type: [Schema.Types.ObjectId], default: [] },
     friends: { type: [Schema.Types.ObjectId], default: [] },
+    lastSeen: { type: Date, default: Date.now },
+
 })
 const User = mongoose.model<IUser>("User", UserSchema)
 

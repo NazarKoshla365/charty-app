@@ -1,10 +1,9 @@
 import { Server, Socket } from "socket.io";
 import { Server as HTTPServer } from "http";
-import jwt from "jsonwebtoken";
-import cookie from "cookie";
-const onlineUsers = new Map<string, string>()
-import Message from "./models/message"
+import Message from "../models/message"
+import { socketAuth } from "../utils/socketAuth";
 
+const onlineUsers = new Map<string, string>()
 
 export const InitSocket = (server: HTTPServer) => {
     const io = new Server(server, {
@@ -15,23 +14,7 @@ export const InitSocket = (server: HTTPServer) => {
         }
     })
 
-    io.use((socket: Socket, next) => {
-        const cookies = socket.handshake.headers.cookie;
-        if (!cookies) return next(new Error("No cookies"));
-        const parsedCookies = cookie.parse(cookies);
-        const token = parsedCookies.token; // назва cookie (наприклад: 'token')
-
-        if (!token) return next(new Error("No token"));
-        try {
-            const decoded = jwt.verify(token, process.env.JWT_SECRET as string)
-            socket.data.user = decoded;
-            next()
-        }
-        catch (err) {
-            return next(new Error("Invalid token"));
-        }
-
-    })
+    io.use(socketAuth)
     io.on("connection", (socket: Socket) => {
         const userId = socket.data.user.id;
         console.log("🔌 New user connected", userId);
@@ -47,12 +30,13 @@ export const InitSocket = (server: HTTPServer) => {
         });
 
 
-        socket.on("send-message", async({ chatId, message }) => {
+        socket.on("send-message", async({ chatId, message,replayedMessage }) => {
             try{
                 const newMessage = new Message({
                     chat:chatId,
                     from:userId,
-                    message:message
+                    message:message,
+                    replyTo:replayedMessage,  
                 })
                 const savedMessage =  await newMessage.save()
               

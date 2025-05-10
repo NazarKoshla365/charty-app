@@ -4,6 +4,7 @@ type Message = {
     chat: string,
     from: string | null,
     message: string,
+    replyTo: string | null,
     timestamp: Date,
 }
 
