@@ -1,22 +1,32 @@
 'use client'
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Phone, Video, VideoOff, Mic, MicOff } from 'lucide-react';
 import { useVideoCallStore } from "@/store/videocallStore";
 import { useVideoConnection } from "@/hooks/useVideoConnection";
+import { useChatStore } from "@/store/chatStore";
 import socket from "@/lib/socket";
 
 export function VideoCall() {
-    const roomId = "room1";
+    const { chatAction } = useChatStore()
+    const chatId = chatAction?.id
+    const roomId = chatId
     const isInitiator = true;
 
-    const { localVideoRef, localStream, setLocalStream, remoteVideoRef } = useVideoConnection(roomId, isInitiator);
-    const { setVideoCall } = useVideoCallStore();
 
-    const [isCameraOn, setIsCameraOn] = useState(true);
+    const { localVideoRef, localStream, setLocalStream, remoteVideoRef, callUser } = useVideoConnection(roomId, isInitiator);
+    const { videoCall, setVideoCall } = useVideoCallStore();
+
+    const [isCameraOn, setIsCameraOn] = useState(false);
     const [isMicrophoneOn, setIsMicrophoneOn] = useState(true);
     const [isLocalMain, setIsLocalMain] = useState(false);
 
+    useEffect(() => {
+        if (videoCall) {
+            callUser();
+        }
+    }, [videoCall]);
+    
     const handleEndCall = () => {
         if (localStream) {
             localStream.getTracks().forEach(track => track.stop());
@@ -28,7 +38,7 @@ export function VideoCall() {
         if (remoteVideoRef.current) {
             remoteVideoRef.current.srcObject = null;
         }
-        socket.emit("call-end",roomId)
+        socket.emit("call-end", roomId)
 
         setVideoCall(false);
     };

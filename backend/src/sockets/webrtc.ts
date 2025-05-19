@@ -1,12 +1,41 @@
 import { Server, Socket } from "socket.io";
 import { socketAuth } from "../utils/socketAuth";
 
+const connectedUsers = new Map<string, string>();
+
 export const InitWebRTC = (io: Server) => {
     io.use(socketAuth);
 
     io.on("connection", (socket: Socket) => {
         const userId = socket.data.user.id;
         console.log(`🟢 ${userId} connected`);
+
+        connectedUsers.set(userId, socket.id);
+
+        socket.on("call-user", ({ to, from, roomId }) => {
+            const targetSocketId = connectedUsers.get(to);
+            if (targetSocketId) {
+                console.log(`📞 ${from} is calling ${to}`);
+                io.to(targetSocketId).emit("incoming-call", { to });
+            }
+        })
+
+        socket.on("accept-call", ({ to, roomId }) => {
+            const targetSocketId = connectedUsers.get(to);
+            if (targetSocketId) {
+                console.log(`✅ ${userId} accepted call from ${to}`);
+                io.to(targetSocketId).emit("call-accepted", { roomId });
+            }
+        })
+
+
+        socket.on("reject-call", ({ to }) => {
+            const targetSocketId = connectedUsers.get(to);
+            if (targetSocketId) {
+                console.log(`❌ ${userId} rejected call from ${to}`);
+                io.to(targetSocketId).emit("call-rejected");
+            }
+        });
 
         socket.on("join room", (roomId: string) => {
             socket.join(roomId);
@@ -38,6 +67,7 @@ export const InitWebRTC = (io: Server) => {
 
         socket.on("disconnect", () => {
             console.log(`🔴 ${userId} disconnected`);
+            connectedUsers.delete(userId);
         });
     });
 };

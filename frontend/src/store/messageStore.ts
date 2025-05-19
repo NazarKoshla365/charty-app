@@ -1,10 +1,14 @@
 import { create } from "zustand"
+type ReplyTo = {
+  id: string ;
+  text: string;
+};
 type Message = {
     _id: string,
     chat: string,
-    from: string | null,
+    from: string ,
     message: string,
-    replyTo: string | null,
+    replyTo: ReplyTo ,
     timestamp: Date,
 }
 

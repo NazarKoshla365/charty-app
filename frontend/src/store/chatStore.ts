@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
 type Chat = {
-    id: number,
+    id: string,
     friendId: number,
     name: string,
     message: string,

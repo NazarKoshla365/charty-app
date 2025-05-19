@@ -1,7 +1,7 @@
 'use client'
 import Image from "next/image"
 import { Phone } from "lucide-react"
-
+import { useVideoCallStore } from "@/store/videocallStore"
 
 type ChatAction = {
     img: string;
@@ -9,11 +9,12 @@ type ChatAction = {
 }
 interface ChatHeaderProps {
     chatAction: ChatAction;
-     isOnline: boolean;
-      setVideoCallAction: (value: boolean) => void 
+    isOnline: boolean;
 }
 
-export function ChatHeader({chatAction, isOnline, setVideoCallAction}: ChatHeaderProps) {
+export function ChatHeader({ chatAction, isOnline }: ChatHeaderProps) {
+    const { setVideoCall } = useVideoCallStore()
+
     return (
         <div className="flex items-center justify-between py-[18px] px-6  border-b  border-[#00000014]">
             <div className="flex items-center gap-x-4">
@@ -23,7 +24,7 @@ export function ChatHeader({chatAction, isOnline, setVideoCallAction}: ChatHeade
                     <p className="flex items-center gap-x-2 text-xs text-[#00000099]"><span className={`block w-[10px] h-[10px] rounded-full ${isOnline ? "bg-[#68D391]" : 'bg-[#E53E3E]'} `}></span>{isOnline ? 'Online' : 'Offline'}</p>
                 </div>
             </div>
-            <button onClick={() => setVideoCallAction(true)} className="flex items-center gap-x-2 py-[10px] px-4 rounded-lg text-[#615ef0] bg-[#615EF01A]"><Phone className="w-5 h-5" />Call</button>
+            <button onClick={() => setVideoCall(true)} className="flex items-center gap-x-2 py-[10px] px-4 rounded-lg text-[#615ef0] bg-[#615EF01A]"><Phone className="w-5 h-5" />Call</button>
         </div>
     )
 }

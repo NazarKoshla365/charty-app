@@ -12,17 +12,16 @@ import { useSocketChat } from "@/hooks/useSocketChat";
 
 export function ChatItem() {
     /*Store hooks */
-    const { setVideoCall } = useVideoCallStore()
-    const { chatAction} = useChatStore();
+    const { chatAction } = useChatStore();
     const { user } = useAuthStore()
     /*Local state */
     const [newMessage, setNewMessage] = useState('');
     const [userId, setUserId] = useState<string | null | undefined>(undefined);
-    const [replyedMessage, setReplyedMessage] = useState<{ id: string; text: string;} | null>(null);
+    const [replyedMessage, setReplyedMessage] = useState<{ id: string; text: string; } | null>(null);
     const [forwardedMessage, setForwardedMessage] = useState<string | null>(null)
-    const [pinedMessages, setPinedMessages] = useState<Record<string, [string, string, string | null]>>({});
+
     const [isShowPinModal, setIsShowPinModal] = useState<boolean>(false)
-    const [confirmedPins, setConfirmedPins] = useState<Record<string, boolean>>({})
+    const [pinsState, setPinsState] = useState<Record<string, { confirmed: boolean; msgId: string, pinMessage: string, from: string, pinTime: string }>>({})
     const [scrollToMessage, setScrollToMessage] = useState<boolean>(false)
 
     const userIdData = user?.userId
@@ -46,11 +45,11 @@ export function ChatItem() {
 
     const handleSendMessage = () => {
         if (!newMessage.trim() || !chatAction || !userIdData) return;
-          
+
         socket.emit("send-message", {
             chatId: chatAction.id,
             message: newMessage,
-            replayedMessage: replyedMessage ? replyedMessage.id : null,
+            replayedMessage: replyedMessage ? replyedMessage : null,
         });
         setReplyedMessage(null)
         setNewMessage('');
@@ -67,15 +66,13 @@ export function ChatItem() {
     return (
         <div className="flex justify-center w-full border-x border-[#00000014] ">
             <div className="flex flex-col w-[45vw]">
-                <ChatHeader chatAction={chatAction} isOnline={isOnline} setVideoCallAction={setVideoCall} />
+                <ChatHeader chatAction={chatAction} isOnline={isOnline} />
 
-                <PinnedMessage chatAction={chatAction} userId={userId} setScrollToMessageAction={setScrollToMessage} pinedMessagesAction={pinedMessages}
-                    confirmedPinsAction={confirmedPins} setConfirmedPinsAction={setConfirmedPins} />
+                <PinnedMessage chatAction={chatAction} userId={userId} setScrollToMessageAction={setScrollToMessage} pinsState={pinsState} setPinsState={setPinsState} />
 
                 <ChatMessages chatAction={chatAction} userId={userId} setReplyedMessageAction={setReplyedMessage}
                     forwardedMessageAction={forwardedMessage} setForwardedMessageAction={setForwardedMessage} isShowPinModalAction={isShowPinModal}
-                    setIsShowPinModalAction={setIsShowPinModal} setPinedMessagesAction={setPinedMessages} pinedMessagesAction={pinedMessages}
-                    confirmedPinsAction={confirmedPins} setConfirmedPinsAction={setConfirmedPins} scrollToMessageAction={scrollToMessage}
+                    setIsShowPinModalAction={setIsShowPinModal} pinsState={pinsState} setPinsState={setPinsState} scrollToMessageAction={scrollToMessage}
                     setScrollToMessageAction={setScrollToMessage} />
                 <div className="mt-auto">
                     <InputMessage onSendMessageAction={handleSendMessage} newMessageAction={newMessage} setNewMessageAction={setNewMessage} replyedMessageAction={replyedMessage} setReplyedMessageAction={setReplyedMessage} />
