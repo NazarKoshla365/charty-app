@@ -5,7 +5,7 @@ import { ChatHeader } from "./ChatHeader";
 import { PinnedMessage } from "./PinnedMessage";
 import { useAuthStore } from "@/store/authStore";
 import { useChatStore } from "@/store/chatStore";
-import { useVideoCallStore } from "@/store/videocallStore";
+
 import socket from "@/lib/socket"
 import { useEffect, useState } from "react";
 import { useSocketChat } from "@/hooks/useSocketChat";
