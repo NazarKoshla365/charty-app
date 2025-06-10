@@ -13,12 +13,10 @@ export default function Home() {
   
   return (
     <div className="flex h-screen relative">
-    
       <CheckAuth />
       <Sidebar />
       <ChatPage />
       <ChatInfo />
-    
     </div>
   );
 }

@@ -8,7 +8,7 @@ import { useChatStore } from '@/store/chatStore';
 
 export function ChatList() {
     const [isClosed, setIsClosed] = useState(true)
-    const [activeChat, setActiveChat] = useState<number | null>(null)
+    const [activeChat, setActiveChat] = useState<string | null>(null)
     const { setChatAction, chats, setChats } = useChatStore();
     useEffect(() => {
         const fetchChats = async () => {
@@ -48,8 +48,8 @@ export function ChatList() {
     
 
     const handleNewChatCreated = (newChat: {
-        chatId: number;
-        participants: { id: number; username: string; profilePicture: string }[];
+        chatId: string;
+        participants: { id: string; username: string; profilePicture: string }[];
     }) => {
         const friend = newChat.participants[1];
         const newChatItem = {
@@ -67,8 +67,8 @@ export function ChatList() {
 
     }
     const MessageItem = ({ id, friendId, name, message, img, time }: {
-        id: number;
-        friendId: number,
+        id: string;
+        friendId: string,
         name: string;
         message: string;
         img: string;

@@ -26,11 +26,9 @@ export default function RootLayout({
       <body
         className={`${inter.className}`}
       >
-      
           <GoogleOAuthProvider clientId={process.env.GOOGLE_CLIENT_ID || "449279408426-cmqu8ujvgilceelbmciuh6ib1kbodsvq.apps.googleusercontent.com"}>
             {children}
           </GoogleOAuthProvider>
-       
       </body>
     </html>
   );
