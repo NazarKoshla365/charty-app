@@ -32,14 +32,6 @@ This project showcases a simple but powerful messaging experience, including rea
 
 ---
 
-## 📸 Preview
-
-![Chat UI Preview](https://github.com/NazarKoshla365/chat-app-realtime-nextjs/blob/main/public/screenshot.png)
-
-> _(Add your actual screenshot or replace this link when you push an image to `/public`)_
-
----
-
 ## 🔐 Authentication Logic
 
 * Users register with email & password
