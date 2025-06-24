@@ -15,8 +15,8 @@ This project showcases a simple but powerful messaging experience, including rea
 - **Database:** MongoDB with Mongoose
 - **Styling:** Tailwind CSS
 - **Auth:** JSON Web Tokens (JWT)
-- **State Management:** React Hooks & Context
-- **Other:** Zod (form validation), Bcrypt (password hashing)
+- **State Management:** React Hooks & Zustand
+- **Other:** Bcrypt (password hashing)
 
 ---
 
