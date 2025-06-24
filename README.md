@@ -40,59 +40,6 @@ This project showcases a simple but powerful messaging experience, including rea
 
 ---
 
-## ⚙️ Getting Started
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/NazarKoshla365/chat-app-realtime-nextjs.git
-cd chat-app-realtime-nextjs
-````
-
-### 2. Install dependencies
-
-```bash
-npm install
-```
-
-### 3. Setup environment variables
-
-Create a `.env.local` file in the root:
-
-```env
-MONGODB_URI=your_mongodb_uri
-JWT_SECRET=your_jwt_secret_key
-```
-
-### 4. Run development server
-
-```bash
-npm run dev
-```
-
-Open `http://localhost:3000` in your browser 🚀
-
----
-
-## 📂 Project Structure Overview
-
-```bash
-├── app/                      # Next.js App Router (pages and layouts)
-│   ├── login/                # Login page
-│   ├── register/             # Register page
-│   ├── chat/                 # Protected chat UI
-│   └── layout.tsx           # Global layout
-├── lib/                      # Helper functions (e.g., JWT, DB)
-├── models/                   # Mongoose models (User, Message)
-├── public/                   # Static files
-├── styles/                   # Tailwind global styles
-├── utils/                    # Validation schema, auth helpers
-├── server.js                 # Custom Socket.IO server
-└── .env.local                # Environment variables
-```
-
----
-
 ## 🔐 Authentication Logic
 
 * Users register with email & password
