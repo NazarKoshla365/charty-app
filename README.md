@@ -25,8 +25,7 @@ This project showcases a simple but powerful messaging experience, including rea
 - 🔒 User registration and login (JWT auth)
 - 💬 Real-time 1-to-1 chat via Socket.IO
 - 📦 Persistent chat history with MongoDB
-- 🧾 Form validation with Zod
-- 📱 Responsive layout (mobile & desktop)
+- 🧾 Form validation 
 - ⚡ Online user tracking
 - 🧠 Clean project structure (modular & scalable)
 
